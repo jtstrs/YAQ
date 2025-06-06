@@ -14,6 +14,7 @@ find_package(Boost REQUIRED format)
 
 set(src_files
     src/ini_config_reader.cpp
+    src/yaq.cpp
 )
 
 add_executable(${APPLICATION_NAME}
