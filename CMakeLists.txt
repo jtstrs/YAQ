@@ -9,11 +9,7 @@ message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 # Find dependencies
 find_package(GTest REQUIRED)
-
-# target_include_directories(${PROJECT_NAME}
-#     # PUBLIC
-#         # ${GTest_INCLUDE_DIRS}
-# )
+find_package(Boost REQUIRED)
 
 # Add executable
 add_executable(${PROJECT_NAME}_app

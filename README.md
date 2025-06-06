@@ -28,20 +28,7 @@ cmake --build .
 
 ## Running Tests
 
-After building, you can run the tests using:
-```bash
-ctest
-```
-
 Or run the test executable directly:
 ```bash
 ./YAQ_tests
 ```
-
-## Project Structure
-
-- `include/` - Header files
-- `src/` - Source files
-- `tests/` - Test files
-- `conanfile.txt` - Conan dependencies
-- `CMakeLists.txt` - CMake build configuration 
