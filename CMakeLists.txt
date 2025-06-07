@@ -31,6 +31,7 @@ target_include_directories(${APPLICATION_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 
 set(test_files
     tests/init_config_reader_test.cpp
+    tests/yaq_test.cpp
 )
 
 # Add tests

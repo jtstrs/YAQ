@@ -15,8 +15,7 @@ std::unique_ptr<Yaq> Yaq::create(const std::unordered_map<std::string, std::stri
 }
 
 Yaq::Yaq(const std::string& host, int32_t port, ConstructorTag tag)
-    : io_context_()
-    , acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(host), port))
+    : acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(host), port))
     , socket_(io_context_)
 {
 }
@@ -31,9 +30,15 @@ void Yaq::run()
 
 void Yaq::handle_accept(const boost::system::error_code& error)
 {
+    accepted_callback_(error);
     if (error) {
         std::cerr << "Accept error: " << error.message() << std::endl;
         return;
     }
     std::cout << "Accepted connection" << std::endl;
+}
+
+void Yaq::set_accepted_callback(std::function<void(const boost::system::error_code&)> callback)
+{
+    accepted_callback_ = callback;
 }

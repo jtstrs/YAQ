@@ -1,10 +1,10 @@
 #ifndef YAQ_H
 #define YAQ_H
 
-#include "boost/asio/ip/tcp.hpp"
-#include <boost/asio.hpp>
-#include <boost/asio/ip/address.hpp>
+#include "acceptor.h"
+#include <boost/asio/ip/tcp.hpp>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -18,12 +18,18 @@ public:
     static std::unique_ptr<Yaq> create(const std::unordered_map<std::string, std::string>& config);
     void run();
 
+    void set_accepted_callback(std::function<void(const boost::system::error_code&)> callback);
+
 private:
-    void handle_accept(const boost::system::error_code& error);
+    using TcpSocket = boost::asio::ip::tcp::socket;
+    using TcpAcceptor = Acceptor<boost::asio::ip::tcp::acceptor, TcpSocket>;
+
+    std::function<void(const boost::system::error_code&)> accepted_callback_;
 
     boost::asio::io_context io_context_;
-    boost::asio::ip::tcp::acceptor acceptor_;
-    boost::asio::ip::tcp::socket socket_;
+    TcpAcceptor acceptor_;
+    TcpSocket socket_;
+    void handle_accept(const boost::system::error_code& error);
 };
 
 #endif // YAQ_H
