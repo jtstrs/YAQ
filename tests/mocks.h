@@ -3,36 +3,36 @@
 
 #include "../src/acceptor.h"
 
-struct FakeSocketImpl {
+struct FakeSocket {
     template <typename... Args>
-    FakeSocketImpl(Args&&... args)
+    FakeSocket(Args&&... args)
     {
     }
 };
 
-template <typename SocketImpl>
-struct FakeAcceptorSuccessImpl {
+template <typename Socket>
+struct FakeAcceptorSuccess {
     template <typename... Args>
-    FakeAcceptorSuccessImpl(Args&&... args)
+    FakeAcceptorSuccess(Args&&... args)
     {
     }
 
-    void async_accept(SocketImpl& socket, std::function<void(const boost::system::error_code&)> handler)
+    void async_accept(std::function<void(const boost::system::error_code&, Socket)> handler)
     {
-        handler(boost::system::error_code());
+        handler(boost::system::error_code(), Socket());
     }
 };
 
-template <typename SocketImpl>
-struct FakeAcceptorErrorImpl {
+template <typename Socket>
+struct FakeAcceptorError {
     template <typename... Args>
-    FakeAcceptorErrorImpl(Args&&... args)
+    FakeAcceptorError(Args&&... args)
     {
     }
 
-    void async_accept(SocketImpl& socket, std::function<void(const boost::system::error_code&)> handler)
+    void async_accept(std::function<void(const boost::system::error_code&, Socket)> handler)
     {
-        handler(boost::system::error_code(boost::asio::error::connection_aborted));
+        handler(boost::system::error_code(boost::asio::error::connection_aborted), Socket());
     }
 };
 

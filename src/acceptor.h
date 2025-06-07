@@ -4,7 +4,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <functional>
 
-template <typename AcceptorImpl, typename SocketImpl>
+template <typename Impl, typename Socket>
 class Acceptor {
 public:
     template <typename... Args>
@@ -13,13 +13,13 @@ public:
     {
     }
 
-    void async_accept(SocketImpl& socket, std::function<void(const boost::system::error_code&)> handler)
+    void async_accept(std::function<void(const boost::system::error_code&, Socket)> handler)
     {
-        acceptor_impl_.async_accept(socket, handler);
+        acceptor_impl_.async_accept(handler);
     }
 
 private:
-    AcceptorImpl acceptor_impl_;
+    Impl acceptor_impl_;
 };
 
 #endif

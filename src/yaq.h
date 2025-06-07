@@ -3,9 +3,9 @@
 
 #include "acceptor.h"
 #include "logger.h"
+#include "socket.h"
 #include <boost/asio/ip/tcp.hpp>
 #include <cstdint>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -19,7 +19,6 @@ class YaqBase {
 public:
     YaqBase(const std::string& host, int32_t port, ConstructorTag tag)
         : acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(host), port))
-        , socket_(io_context_)
     {
     }
 
@@ -36,8 +35,8 @@ public:
 
     void run()
     {
-        acceptor_.async_accept(socket_, [this](const boost::system::error_code& error) {
-            handle_accept(socket_, error);
+        acceptor_.async_accept([this](const boost::system::error_code& error, Socket<SocketImpl> socket) {
+            handle_accept(error, std::move(socket));
         });
         io_context_.run();
     }
@@ -48,16 +47,14 @@ public:
     }
 
 private:
-    using TcpSocket = SocketImpl;
-    using TcpAcceptor = Acceptor<AcceptorImpl, TcpSocket>;
+    using TcpAcceptor = Acceptor<AcceptorImpl, Socket<SocketImpl>>;
 
     std::function<void(const boost::system::error_code&)> accepted_callback_;
 
     boost::asio::io_context io_context_;
     TcpAcceptor acceptor_;
-    TcpSocket socket_;
 
-    void handle_accept(TcpSocket& socket, const boost::system::error_code& error)
+    void handle_accept(const boost::system::error_code& error, Socket<SocketImpl> socket)
     {
         if (accepted_callback_) {
             accepted_callback_(error);
