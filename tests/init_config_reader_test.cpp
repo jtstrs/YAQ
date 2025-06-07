@@ -21,3 +21,20 @@ TEST(IniConfigReader, ReadBadConfig)
     IniConfigReader reader;
     EXPECT_THROW(reader.read(ss), std::runtime_error);
 }
+
+TEST(IniConfigReader, ReadEmptyConfig)
+{
+    std::stringstream ss;
+    IniConfigReader reader;
+    auto config = reader.read(ss);
+    EXPECT_EQ(config.size(), 0);
+}
+
+TEST(IniConfigReader, ReadInvalidConfig)
+{
+    std::stringstream ss;
+    ss << "key+value\n";
+    ss << "key2Fvalue";
+    IniConfigReader reader;
+    EXPECT_THROW(reader.read(ss), std::runtime_error);
+}
