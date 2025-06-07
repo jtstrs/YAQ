@@ -14,6 +14,7 @@ find_package(Boost REQUIRED format)
 
 set(src_files
     src/ini_config_reader.cpp
+    src/logger.cpp
 )
 
 add_executable(${APPLICATION_NAME}
@@ -31,6 +32,7 @@ target_include_directories(${APPLICATION_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 set(test_files
     tests/init_config_reader_test.cpp
     tests/yaq_test.cpp
+    tests/logger_test.cpp
 )
 
 # Add tests

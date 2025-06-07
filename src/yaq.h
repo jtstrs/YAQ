@@ -2,6 +2,7 @@
 #define YAQ_H
 
 #include "acceptor.h"
+#include "logger.h"
 #include <boost/asio/ip/tcp.hpp>
 #include <cstdint>
 #include <iostream>
@@ -60,10 +61,10 @@ private:
     {
         accepted_callback_(error);
         if (error) {
-            std::cerr << "Accept error: " << error.message() << std::endl;
+            Logger::getInstance().error("Accept error: " + error.message());
             return;
         }
-        std::cout << "Accepted connection" << std::endl;
+        Logger::getInstance().info("Accepted connection");
     }
 };
 
