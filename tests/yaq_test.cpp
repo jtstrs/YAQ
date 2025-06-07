@@ -47,3 +47,9 @@ TEST_F(ValidConfigTest, AcceptConnectionError)
     });
     yaq->run();
 }
+
+TEST_F(ValidConfigTest, AcceptConnectionWithoutCallback)
+{
+    auto yaq = YaqBase<FakeAcceptorSuccessImpl<FakeSocketImpl>, FakeSocketImpl>::create(config_);
+    ASSERT_NO_FATAL_FAILURE(yaq->run());
+}

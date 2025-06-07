@@ -37,7 +37,7 @@ public:
     void run()
     {
         acceptor_.async_accept(socket_, [this](const boost::system::error_code& error) {
-            handle_accept(error);
+            handle_accept(socket_, error);
         });
         io_context_.run();
     }
@@ -57,9 +57,12 @@ private:
     TcpAcceptor acceptor_;
     TcpSocket socket_;
 
-    void handle_accept(const boost::system::error_code& error)
+    void handle_accept(TcpSocket& socket, const boost::system::error_code& error)
     {
-        accepted_callback_(error);
+        if (accepted_callback_) {
+            accepted_callback_(error);
+        }
+
         if (error) {
             Logger::getInstance().error("Accept error: " + error.message());
             return;
