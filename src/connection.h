@@ -12,6 +12,11 @@ public:
         : socket_(std::move(socket))
         , buffer_(buffer_size)
     {
+    }
+
+    void accepted()
+    {
+        Logger::getInstance().info("Connection accepted");
         async_receive(boost::asio::buffer(buffer_), [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
             on_receive(error, bytes_transferred);
         });

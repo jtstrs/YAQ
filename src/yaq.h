@@ -4,6 +4,7 @@
 #include "acceptor.h"
 #include "connection.h"
 #include "logger.h"
+#include "network.h"
 #include "socket.h"
 #include <boost/asio/ip/tcp.hpp>
 #include <cstdint>
@@ -11,7 +12,7 @@
 #include <string>
 #include <unordered_map>
 
-template <typename AcceptorImpl, typename SocketImpl, typename ClientConnection = Connection<Socket<SocketImpl>>>
+template <typename Network>
 class YaqBase {
     struct ConstructorTag {
         explicit ConstructorTag() = default;
@@ -19,16 +20,19 @@ class YaqBase {
 
 public:
     YaqBase(const std::string& host, int32_t port, ConstructorTag tag)
-        : acceptor_(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(host), port))
+        : network_(io_context_, host, port)
     {
+        network_.set_on_new_connection([this](std::unique_ptr<typename Network::Connection> connection) {
+            handle_new_connection(std::move(connection));
+        });
     }
 
-    static std::unique_ptr<YaqBase<AcceptorImpl, SocketImpl, ClientConnection>> create(const std::unordered_map<std::string, std::string>& config)
+    static std::unique_ptr<YaqBase<Network>> create(const std::unordered_map<std::string, std::string>& config)
     {
         try {
             const std::string host = config.at("host");
             const int32_t port = std::stoi(config.at("port"));
-            return std::make_unique<YaqBase<AcceptorImpl, SocketImpl, ClientConnection>>(host, port, ConstructorTag());
+            return std::make_unique<YaqBase<Network>>(host, port, ConstructorTag());
         } catch (const std::exception& e) {
             throw std::runtime_error(e.what());
         }
@@ -36,47 +40,30 @@ public:
 
     void run()
     {
-        acceptor_.async_accept([this](const boost::system::error_code& error, Socket<SocketImpl> socket) {
-            handle_accept(error, std::move(socket));
-        });
+        network_.run();
         io_context_.run();
     }
 
-    void set_accepted_callback(std::function<void(const boost::system::error_code&)> callback)
+    void stop()
     {
-        accepted_callback_ = callback;
+        network_.stop();
+        io_context_.stop();
     }
 
 private:
-    using TcpAcceptor = Acceptor<AcceptorImpl, Socket<SocketImpl>>;
-    std::function<void(const boost::system::error_code&)> accepted_callback_;
-
-    boost::asio::io_context io_context_;
-    TcpAcceptor acceptor_;
-
-    std::vector<std::unique_ptr<ClientConnection>> connections_;
-
-    void handle_accept(const boost::system::error_code& error, Socket<SocketImpl> socket)
+    void handle_new_connection(std::unique_ptr<typename Network::Connection> connection)
     {
-        if (accepted_callback_) {
-            accepted_callback_(error);
-        }
-
-        if (error) {
-            Logger::getInstance().error("Accept error: " + error.message());
-            return;
-        }
-        Logger::getInstance().info("Accepted connection");
-        auto connection = std::make_unique<ClientConnection>(std::move(socket));
+        Logger::getInstance().info("New connection");
+        connection->accepted();
         connections_.push_back(std::move(connection));
-
-        acceptor_.async_accept([this](const boost::system::error_code& error, Socket<SocketImpl> socket) {
-            handle_accept(error, std::move(socket));
-        });
     }
+
+    std::vector<std::unique_ptr<typename Network::Connection>> connections_;
+    boost::asio::io_context io_context_;
+    Network network_;
 };
 
 // Use boost::asio::ip::tcp::acceptor by default
-using Yaq = YaqBase<boost::asio::ip::tcp::acceptor, boost::asio::ip::tcp::socket>;
+using Yaq = YaqBase<Network<boost::asio::ip::tcp::acceptor, boost::asio::ip::tcp::socket>>;
 
 #endif // YAQ_H
