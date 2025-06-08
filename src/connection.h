@@ -3,16 +3,16 @@
 
 #include "logger.h"
 #include "socket.h"
+#include <vector>
 
-template <typename Socket>
+template <typename Socket, int32_t buffer_size = 1024>
 class Connection {
 public:
     Connection(Socket socket)
         : socket_(std::move(socket))
+        , buffer_(buffer_size)
     {
-        Logger::getInstance().info("Connection::Connection");
         async_receive(boost::asio::buffer(buffer_), [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
-            Logger::getInstance().info("Connection::async_receive buffer: " + std::to_string(bytes_transferred));
         });
     }
 
@@ -23,7 +23,7 @@ public:
 
 private:
     Socket socket_;
-    boost::asio::mutable_buffer buffer_;
+    std::vector<char> buffer_;
 };
 
 #endif // CONNECTION_H
