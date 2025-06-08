@@ -17,12 +17,12 @@ public:
         });
     }
 
+private:
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
         socket_.async_receive(buffer, handler);
     }
 
-private:
     void on_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
     {
         if (error == boost::asio::error::eof) {

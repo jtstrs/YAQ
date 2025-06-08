@@ -33,6 +33,7 @@ set(test_files
     tests/init_config_reader_test.cpp
     tests/yaq_test.cpp
     tests/logger_test.cpp
+    tests/connection_test.cpp
 )
 
 # Add tests
