@@ -13,6 +13,11 @@ struct FakeSocket {
     {
         handler(boost::system::error_code(), 0);
     }
+
+    bool is_open() const
+    {
+        return true;
+    }
 };
 
 template <typename Socket>

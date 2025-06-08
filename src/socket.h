@@ -18,6 +18,11 @@ public:
         socket_.async_receive(buffer, handler);
     }
 
+    bool is_open() const
+    {
+        return socket_.is_open();
+    }
+
 private:
     Impl socket_;
 };
