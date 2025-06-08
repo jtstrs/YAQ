@@ -52,6 +52,10 @@ struct FakeAcceptorSuccess {
         already_accepted = true;
         handler(boost::system::error_code(), Socket());
     }
+
+    void cancel()
+    {
+    }
 };
 
 template <typename Socket>
@@ -64,6 +68,10 @@ struct FakeAcceptorError {
     void async_accept(std::function<void(const boost::system::error_code&, Socket)> handler)
     {
         handler(boost::system::error_code(boost::asio::error::connection_aborted), Socket());
+    }
+
+    void cancel()
+    {
     }
 };
 

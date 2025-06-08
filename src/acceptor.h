@@ -18,6 +18,11 @@ public:
         acceptor_impl_.async_accept(handler);
     }
 
+    void cancel()
+    {
+        acceptor_impl_.cancel();
+    }
+
 private:
     Impl acceptor_impl_;
 };

@@ -1,9 +1,10 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include "acceptor.h"
 #include "boost/asio/ip/tcp.hpp"
 #include "connection.h"
-#include "yaq.h"
+#include "socket.h"
 
 template <typename AcceptorImpl, typename SocketImpl, typename ClientConnection = Connection<Socket<SocketImpl>>>
 class NetworkBase {
