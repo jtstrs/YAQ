@@ -30,17 +30,25 @@ struct SocketReceiveError {
     }
 };
 
-TEST(ConnectionTest, Constructor)
+TEST(ConnectionTest, CreateConnection)
+{
+    ASSERT_NO_FATAL_FAILURE({ Connection<SocketReceiveSuccess> connection((SocketReceiveSuccess())); });
+}
+
+TEST(ConnectionTest, AcceptConnectionSucces)
 {
     Connection<SocketReceiveSuccess> connection((SocketReceiveSuccess()));
+    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
 
-TEST(ConnectionTest, ConstructorEof)
+TEST(ConnectionTest, AcceptConnectionEof)
 {
     Connection<SocketReceiveEof> connection((SocketReceiveEof()));
+    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
 
-TEST(ConnectionTest, ConstructorError)
+TEST(ConnectionTest, AcceptConnectionError)
 {
     Connection<SocketReceiveError> connection((SocketReceiveError()));
+    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
