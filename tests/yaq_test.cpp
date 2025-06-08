@@ -32,7 +32,7 @@ TEST(YaqCreateTest, CreateWithoutPort)
 
 TEST_F(ValidConfigTest, AcceptConnectionSuccess)
 {
-    auto yaq = YaqBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket>::create(config_);
+    auto yaq = YaqBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection>::create(config_);
     yaq->set_accepted_callback([this](const boost::system::error_code& error) {
         EXPECT_FALSE(error);
     });
@@ -41,7 +41,7 @@ TEST_F(ValidConfigTest, AcceptConnectionSuccess)
 
 TEST_F(ValidConfigTest, AcceptConnectionError)
 {
-    auto yaq = YaqBase<FakeAcceptorError<FakeSocket>, FakeSocket>::create(config_);
+    auto yaq = YaqBase<FakeAcceptorError<FakeSocket>, FakeSocket, FakeConnection>::create(config_);
     yaq->set_accepted_callback([this](const boost::system::error_code& error) {
         EXPECT_TRUE(error);
     });
@@ -50,6 +50,6 @@ TEST_F(ValidConfigTest, AcceptConnectionError)
 
 TEST_F(ValidConfigTest, AcceptConnectionWithoutCallback)
 {
-    auto yaq = YaqBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket>::create(config_);
+    auto yaq = YaqBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection>::create(config_);
     ASSERT_NO_FATAL_FAILURE(yaq->run());
 }
