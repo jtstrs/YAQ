@@ -18,6 +18,10 @@ struct FakeSocket {
     {
         return true;
     }
+
+    void close()
+    {
+    }
 };
 
 template <typename Socket>

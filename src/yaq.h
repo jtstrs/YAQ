@@ -69,6 +69,10 @@ private:
         Logger::getInstance().info("Accepted connection");
         auto connection = std::make_unique<ClientConnection>(std::move(socket));
         connections_.push_back(std::move(connection));
+
+        acceptor_.async_accept([this](const boost::system::error_code& error, Socket<SocketImpl> socket) {
+            handle_accept(error, std::move(socket));
+        });
     }
 };
 

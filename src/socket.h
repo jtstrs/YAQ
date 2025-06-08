@@ -23,6 +23,11 @@ public:
         return socket_.is_open();
     }
 
+    void close()
+    {
+        socket_.close();
+    }
+
 private:
     Impl socket_;
 };
