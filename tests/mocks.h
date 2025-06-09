@@ -9,6 +9,10 @@ struct FakeConnection {
     {
     }
 
+    void accepted()
+    {
+    }
+
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
         handler(boost::system::error_code(), 0);

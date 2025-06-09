@@ -11,45 +11,38 @@ protected:
     }
 };
 
-TEST(YaqCreateTest, CreateWithValidConfig)
+using FakeNetwork = NetworkBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection>;
+
+TEST_F(ValidConfigTest, CreateYaq)
 {
-    std::unordered_map<std::string, std::string> config = {
-        { "host", "127.0.0.1" },
-        { "port", "8080" }
-    };
-    auto yaq = Yaq::create(config);
-    EXPECT_NE(yaq, nullptr);
+    auto yaq = YaqBase<FakeNetwork>::create(config_);
+    ASSERT_TRUE(yaq);
 }
 
-// Probably bind to default port???
-TEST(YaqCreateTest, CreateWithoutPort)
+TEST_F(ValidConfigTest, RunYaq)
 {
-    std::unordered_map<std::string, std::string> config_without_port = {
-        { "host", "127.0.0.1" }
-    };
-    EXPECT_THROW({ auto yaq = Yaq::create(config_without_port); }, std::runtime_error);
+    auto yaq = YaqBase<FakeNetwork>::create(config_);
+    ASSERT_TRUE(yaq);
+    ASSERT_NO_FATAL_FAILURE({ yaq->run(); });
 }
 
-TEST_F(ValidConfigTest, AcceptConnectionSuccess)
+TEST(BadConfigTest, CreateYaq)
 {
-    auto yaq = YaqBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection>::create(config_);
-    yaq->set_accepted_callback([this](const boost::system::error_code& error) {
-        EXPECT_FALSE(error);
-    });
-    yaq->run();
+    std::unordered_map<std::string, std::string> config_;
+    config_ = { { "host", "127.0.0.1" }, { "port", "not_a_port" } };
+    ASSERT_THROW(YaqBase<FakeNetwork>::create(config_), std::runtime_error);
 }
 
-TEST_F(ValidConfigTest, AcceptConnectionError)
+TEST_F(ValidConfigTest, StopYaq)
 {
-    auto yaq = YaqBase<FakeAcceptorError<FakeSocket>, FakeSocket, FakeConnection>::create(config_);
-    yaq->set_accepted_callback([this](const boost::system::error_code& error) {
-        EXPECT_TRUE(error);
-    });
-    yaq->run();
+    auto yaq = YaqBase<FakeNetwork>::create(config_);
+    ASSERT_TRUE(yaq);
+    ASSERT_NO_FATAL_FAILURE({ yaq->stop(); });
 }
 
-TEST_F(ValidConfigTest, AcceptConnectionWithoutCallback)
+TEST_F(ValidConfigTest, HandleNewConnection)
 {
-    auto yaq = YaqBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection>::create(config_);
-    ASSERT_NO_FATAL_FAILURE(yaq->run());
+    auto yaq = YaqBase<FakeNetwork>::create(config_);
+    ASSERT_TRUE(yaq);
+    ASSERT_NO_FATAL_FAILURE({ yaq->run(); });
 }
