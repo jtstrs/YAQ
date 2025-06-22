@@ -4,6 +4,12 @@
 
 struct SocketReceiveSuccess {
     int32_t received_count = 0;
+    std::string received_message;
+
+    explicit SocketReceiveSuccess(const std::string& message = "")
+        : received_message(message)
+    {
+    }
 
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
@@ -12,7 +18,8 @@ struct SocketReceiveSuccess {
         }
         // To check receive after receive is called
         received_count++;
-        handler(boost::system::error_code(), 0);
+        boost::asio::buffer_copy(buffer, boost::asio::buffer(received_message), received_message.size());
+        handler(boost::system::error_code(), received_message.size());
     }
 };
 
@@ -50,5 +57,14 @@ TEST(ConnectionTest, AcceptConnectionEof)
 TEST(ConnectionTest, AcceptConnectionError)
 {
     Connection<SocketReceiveError> connection((SocketReceiveError()));
+    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
+}
+
+TEST(ConnectionTest, OnMessageCallback)
+{
+    Connection<SocketReceiveSuccess> connection((SocketReceiveSuccess("test")));
+    connection.set_on_message([](const std::string& message) {
+        EXPECT_EQ(message, "test");
+    });
     ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }

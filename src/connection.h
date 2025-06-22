@@ -14,6 +14,11 @@ public:
     {
     }
 
+    void set_on_message(std::function<void(const std::string&)> callback)
+    {
+        on_message_ = callback;
+    }
+
     void accepted()
     {
         Logger::getInstance().info("Connection accepted");
@@ -23,6 +28,8 @@ public:
     }
 
 private:
+    std::function<void(const std::string&)> on_message_;
+
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
         socket_.async_receive(buffer, handler);
@@ -41,6 +48,11 @@ private:
         }
 
         Logger::getInstance().info("Connection::async_receive buffer: " + std::string(buffer_.data(), bytes_transferred));
+
+        if (on_message_) {
+            on_message_(std::string(buffer_.data(), bytes_transferred));
+        }
+
         async_receive(boost::asio::buffer(buffer_), [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
             on_receive(error, bytes_transferred);
         });
