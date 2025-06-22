@@ -18,6 +18,12 @@ struct Command {
     CommandType type;
     std::vector<std::variant<std::string>> args;
 
+    Command()
+        : type(CommandType::Unknown)
+        , args()
+    {
+    }
+
     Command(CommandType type, std::vector<std::variant<std::string>> args)
         : type(type)
         , args(args)
