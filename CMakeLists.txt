@@ -15,6 +15,7 @@ find_package(Boost REQUIRED format)
 set(src_files
     src/ini_config_reader.cpp
     src/logger.cpp
+    src/protocol.cpp
 )
 
 add_executable(${APPLICATION_NAME}
@@ -35,6 +36,7 @@ set(test_files
     tests/logger_test.cpp
     tests/connection_test.cpp
     tests/network_test.cpp
+    tests/protocol_test.cpp
 )
 
 # Add tests
