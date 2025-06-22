@@ -14,9 +14,9 @@ public:
     {
     }
 
-    void set_on_message(std::function<void(const std::string&)> callback)
+    void set_on_message_received(std::function<void(const std::string&)> callback)
     {
-        on_message_ = callback;
+        on_message_received_ = callback;
     }
 
     void accepted()
@@ -28,7 +28,7 @@ public:
     }
 
 private:
-    std::function<void(const std::string&)> on_message_;
+    std::function<void(const std::string&)> on_message_received_;
 
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
@@ -49,8 +49,8 @@ private:
 
         Logger::getInstance().info("Connection::async_receive buffer: " + std::string(buffer_.data(), bytes_transferred));
 
-        if (on_message_) {
-            on_message_(std::string(buffer_.data(), bytes_transferred));
+        if (on_message_received_) {
+            on_message_received_(std::string(buffer_.data(), bytes_transferred));
         }
 
         async_receive(boost::asio::buffer(buffer_), [this](const boost::system::error_code& error, std::size_t bytes_transferred) {

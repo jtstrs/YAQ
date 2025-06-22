@@ -63,7 +63,7 @@ TEST(ConnectionTest, AcceptConnectionError)
 TEST(ConnectionTest, OnMessageCallback)
 {
     Connection<SocketReceiveSuccess> connection((SocketReceiveSuccess("test")));
-    connection.set_on_message([](const std::string& message) {
+    connection.set_on_message_received([](const std::string& message) {
         EXPECT_EQ(message, "test");
     });
     ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
