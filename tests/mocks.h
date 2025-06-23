@@ -3,6 +3,7 @@
 
 #include "../src/acceptor.h"
 #include "../src/protocol.h"
+#include <string_view>
 
 struct FakeProtocol {
     Command parse(const std::string& message)
@@ -31,14 +32,14 @@ struct FakeConnection {
     }
 };
 
-struct FakeSocketReceiveSuccess {
-    int32_t received_count = 0;
-    std::string received_message;
+struct DefaultMessageSource {
+    static constexpr std::string_view message = "";
+};
 
-    explicit FakeSocketReceiveSuccess(const std::string& message = "")
-        : received_message(message)
-    {
-    }
+template <typename MessageSource = DefaultMessageSource>
+struct FakeSocketSuccessReceiveMessage {
+    int32_t received_count = 0;
+    std::string_view received_message = MessageSource::message;
 
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
@@ -60,6 +61,8 @@ struct FakeSocketReceiveSuccess {
     {
     }
 };
+
+using FakeSocketReceiveSuccess = FakeSocketSuccessReceiveMessage<DefaultMessageSource>;
 
 struct FakeSocketReceiveEof {
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)

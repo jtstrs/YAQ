@@ -25,9 +25,14 @@ TEST(ConnectionTest, AcceptConnectionError)
     ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
 
+struct MessageSource {
+    static constexpr std::string_view message = "test";
+};
+
 TEST(ConnectionTest, OnMessageCallback)
 {
-    Connection<FakeSocketReceiveSuccess> connection((FakeSocketReceiveSuccess("test")));
+    using ConnectionType = Connection<FakeSocketSuccessReceiveMessage<MessageSource>>;
+    ConnectionType connection((FakeSocketSuccessReceiveMessage<MessageSource>()));
     connection.set_on_message_received([](const std::string& message) {
         EXPECT_EQ(message, "test");
     });
