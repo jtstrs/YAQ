@@ -5,6 +5,7 @@
 #include "connection.h"
 #include "logger.h"
 #include "network.h"
+#include "protocol.h"
 #include "socket.h"
 #include <boost/asio/ip/tcp.hpp>
 #include <cstdint>
@@ -12,7 +13,7 @@
 #include <string>
 #include <unordered_map>
 
-template <typename Network>
+template <typename Network, typename Protocol>
 class YaqBase {
     struct ConstructorTag {
         explicit ConstructorTag() = default;
@@ -27,12 +28,12 @@ public:
         });
     }
 
-    static std::unique_ptr<YaqBase<Network>> create(const std::unordered_map<std::string, std::string>& config)
+    static std::unique_ptr<YaqBase<Network, Protocol>> create(const std::unordered_map<std::string, std::string>& config)
     {
         try {
             const std::string host = config.at("host");
             const int32_t port = std::stoi(config.at("port"));
-            return std::make_unique<YaqBase<Network>>(host, port, ConstructorTag());
+            return std::make_unique<YaqBase<Network, Protocol>>(host, port, ConstructorTag());
         } catch (const std::exception& e) {
             throw std::runtime_error(e.what());
         }
@@ -54,16 +55,52 @@ private:
     void handle_new_connection(std::unique_ptr<typename Network::Connection> connection)
     {
         Logger::getInstance().info("New connection");
-        connection->accepted();
         connections_.push_back(std::move(connection));
+
+        connections_.back()->accepted();
+        connections_.back()->set_on_message_received([this](const std::string& message) {
+            handle_message(connections_.back(), message);
+        });
+    }
+
+    void handle_message(const std::unique_ptr<typename Network::Connection>& connection, const std::string& message)
+    {
+        Logger::getInstance().info("Message: " + message);
+        Command command;
+        try {
+            command = protocol_.parse(message);
+        } catch (const std::exception& e) {
+            Logger::getInstance().error("Error parsing message: " + std::string(e.what()));
+        }
+        switch (command.type) {
+        case CommandType::Subscribe:
+            break;
+        case CommandType::Unsubscribe:
+            break;
+        case CommandType::PostMessage:
+            break;
+        case CommandType::Ping:
+            handle_ping(connection);
+            break;
+        case CommandType::Topic:
+            break;
+        case CommandType::Unknown:
+            break;
+        }
+    }
+
+    void handle_ping(const std::unique_ptr<typename Network::Connection>& connection)
+    {
+        Logger::getInstance().info("Ping");
     }
 
     std::vector<std::unique_ptr<typename Network::Connection>> connections_;
     boost::asio::io_context io_context_;
     Network network_;
+    Protocol protocol_;
 };
 
 // Use boost::asio::ip::tcp::acceptor by default
-using Yaq = YaqBase<Network<boost::asio::ip::tcp::acceptor, boost::asio::ip::tcp::socket>>;
+using Yaq = YaqBase<Network<boost::asio::ip::tcp::acceptor, boost::asio::ip::tcp::socket>, Protocol>;
 
 #endif // YAQ_H
