@@ -4,30 +4,30 @@
 
 TEST(ConnectionTest, CreateConnection)
 {
-    ASSERT_NO_FATAL_FAILURE({ Connection<SocketReceiveSuccess> connection((SocketReceiveSuccess())); });
+    ASSERT_NO_FATAL_FAILURE({ Connection<FakeSocketReceiveSuccess> connection((FakeSocketReceiveSuccess())); });
 }
 
 TEST(ConnectionTest, AcceptConnectionSucces)
 {
-    Connection<SocketReceiveSuccess> connection((SocketReceiveSuccess()));
+    Connection<FakeSocketReceiveSuccess> connection((FakeSocketReceiveSuccess()));
     ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
 
 TEST(ConnectionTest, AcceptConnectionEof)
 {
-    Connection<SocketReceiveEof> connection((SocketReceiveEof()));
+    Connection<FakeSocketReceiveEof> connection((FakeSocketReceiveEof()));
     ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
 
 TEST(ConnectionTest, AcceptConnectionError)
 {
-    Connection<SocketReceiveError> connection((SocketReceiveError()));
+    Connection<FakeSocketReceiveError> connection((FakeSocketReceiveError()));
     ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
 
 TEST(ConnectionTest, OnMessageCallback)
 {
-    Connection<SocketReceiveSuccess> connection((SocketReceiveSuccess("test")));
+    Connection<FakeSocketReceiveSuccess> connection((FakeSocketReceiveSuccess("test")));
     connection.set_on_message_received([](const std::string& message) {
         EXPECT_EQ(message, "test");
     });

@@ -47,7 +47,7 @@ TEST_F(ValidConfigTest, HandleNewConnection)
     ASSERT_NO_FATAL_FAILURE({ yaq->run(); });
 }
 
-using FakeNetworkWithMessage = NetworkBase<FakeAcceptorSuccess<SocketReceiveSuccess>, SocketReceiveSuccess, FakeConnection>;
+using FakeNetworkWithMessage = NetworkBase<FakeAcceptorSuccess<FakeSocketReceiveSuccess>, FakeSocketReceiveSuccess, FakeConnection>;
 
 TEST_F(ValidConfigTest, HandleMessage)
 {

@@ -31,11 +31,11 @@ struct FakeConnection {
     }
 };
 
-struct SocketReceiveSuccess {
+struct FakeSocketReceiveSuccess {
     int32_t received_count = 0;
     std::string received_message;
 
-    explicit SocketReceiveSuccess(const std::string& message = "")
+    explicit FakeSocketReceiveSuccess(const std::string& message = "")
         : received_message(message)
     {
     }
@@ -61,7 +61,7 @@ struct SocketReceiveSuccess {
     }
 };
 
-struct SocketReceiveEof {
+struct FakeSocketReceiveEof {
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
         handler(boost::asio::error::eof, 0);
@@ -77,7 +77,7 @@ struct SocketReceiveEof {
     }
 };
 
-struct SocketReceiveError {
+struct FakeSocketReceiveError {
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
         handler(boost::asio::error::not_connected, 0);

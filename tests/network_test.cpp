@@ -5,21 +5,21 @@
 TEST(NetworkTest, CreateNetwork)
 {
     boost::asio::io_context io_context;
-    NetworkBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection> network(io_context, "127.0.0.1", 8080);
+    NetworkBase<FakeAcceptorSuccess<FakeSocketReceiveSuccess>, FakeSocketReceiveSuccess, FakeConnection> network(io_context, "127.0.0.1", 8080);
     ASSERT_NO_FATAL_FAILURE({ network.run(); });
 }
 
 TEST(NetworkTest, StopNetwork)
 {
     boost::asio::io_context io_context;
-    NetworkBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection> network(io_context, "127.0.0.1", 8080);
+    NetworkBase<FakeAcceptorSuccess<FakeSocketReceiveSuccess>, FakeSocketReceiveSuccess, FakeConnection> network(io_context, "127.0.0.1", 8080);
     ASSERT_NO_FATAL_FAILURE({ network.stop(); });
 }
 
 TEST(NetworkTest, SetOnNewConnection)
 {
     boost::asio::io_context io_context;
-    NetworkBase<FakeAcceptorSuccess<FakeSocket>, FakeSocket, FakeConnection> network(io_context, "127.0.0.1", 8080);
+    NetworkBase<FakeAcceptorSuccess<FakeSocketReceiveSuccess>, FakeSocketReceiveSuccess, FakeConnection> network(io_context, "127.0.0.1", 8080);
     network.set_on_new_connection([](std::unique_ptr<FakeConnection> connection) {
         EXPECT_TRUE(connection);
     });
@@ -29,7 +29,7 @@ TEST(NetworkTest, SetOnNewConnection)
 TEST(NetworkTest, HandleAcceptError)
 {
     boost::asio::io_context io_context;
-    NetworkBase<FakeAcceptorError<FakeSocket>, FakeSocket, FakeConnection> network(io_context, "127.0.0.1", 8080);
+    NetworkBase<FakeAcceptorError<FakeSocketReceiveSuccess>, FakeSocketReceiveSuccess, FakeConnection> network(io_context, "127.0.0.1", 8080);
     network.set_on_new_connection([](std::unique_ptr<FakeConnection> connection) {
         EXPECT_TRUE(connection);
     });
