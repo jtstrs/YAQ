@@ -14,6 +14,8 @@ enum class CommandType {
     Unknown
 };
 
+std::string to_string(CommandType type);
+
 struct Command {
     CommandType type;
     std::vector<std::variant<std::string>> args;

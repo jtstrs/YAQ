@@ -4,6 +4,25 @@
 #include <sstream>
 #include <vector>
 
+std::string to_string(CommandType type)
+{
+    switch (type) {
+    case CommandType::Subscribe:
+        return "SUBSCRIBE";
+    case CommandType::Unsubscribe:
+        return "UNSUBSCRIBE";
+    case CommandType::Topic:
+        return "TOPICS";
+    case CommandType::PostMessage:
+        return "POST";
+    case CommandType::Ping:
+        return "PING";
+    case CommandType::Unknown:
+        return "UNKNOWN";
+    }
+    throw std::runtime_error("Invalid command type");
+}
+
 Command Protocol::parse(const std::string& command)
 {
     std::string token;
