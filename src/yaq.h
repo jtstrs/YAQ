@@ -57,10 +57,10 @@ private:
         Logger::getInstance().info("New connection");
         connections_.push_back(std::move(connection));
 
-        connections_.back()->accepted();
         connections_.back()->set_on_message_received([this](const std::string& message) {
             handle_message(connections_.back(), message);
         });
+        connections_.back()->accepted();
     }
 
     void handle_message(const std::unique_ptr<typename Network::Connection>& connection, const std::string& message)

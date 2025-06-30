@@ -18,6 +18,11 @@ public:
         socket_.async_receive(buffer, handler);
     }
 
+    void async_send(boost::asio::const_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
+    {
+        socket_.async_send(buffer, handler);
+    }
+
     bool is_open() const
     {
         return socket_.is_open();

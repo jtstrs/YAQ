@@ -27,8 +27,23 @@ public:
         });
     }
 
+    void send(const std::string& message)
+    {
+        Logger::getInstance().info("Connection::send message: " + message);
+        async_send(boost::asio::buffer(message), [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
+            if (error) {
+                Logger::getInstance().error("Connection::send error: " + error.message());
+            }
+        });
+    }
+
 private:
     std::function<void(const std::string&)> on_message_received_;
+
+    void async_send(boost::asio::const_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
+    {
+        socket_.async_send(buffer, handler);
+    }
 
     void async_receive(boost::asio::mutable_buffer buffer, std::function<void(const boost::system::error_code&, std::size_t)> handler)
     {
