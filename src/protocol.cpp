@@ -53,19 +53,19 @@ Command Protocol::parse(const std::string& command)
 
     if (type == CommandType::Subscribe || type == CommandType::Unsubscribe) {
         if (args.size() != 1) {
-            throw std::runtime_error("Invalid command");
+            throw std::runtime_error("Mismatch number of arguments for command: " + to_string(type));
         }
     }
 
     if (type == CommandType::PostMessage) {
         if (args.size() != 2) {
-            throw std::runtime_error("Invalid command");
+            throw std::runtime_error("Mismatch number of arguments for command: " + to_string(type));
         }
     }
 
     if (type == CommandType::Ping || type == CommandType::Topic) {
         if (args.size() != 0) {
-            throw std::runtime_error("Invalid command");
+            throw std::runtime_error("Mismatch number of arguments for command: " + to_string(type));
         }
     }
 
@@ -74,15 +74,15 @@ Command Protocol::parse(const std::string& command)
 
 CommandType Protocol::parse_command_type(const std::string& command)
 {
-    if (command == "subscribe") {
+    if (command == "SUBSCRIBE") {
         return CommandType::Subscribe;
-    } else if (command == "unsubscribe") {
+    } else if (command == "UNSUBSCRIBE") {
         return CommandType::Unsubscribe;
-    } else if (command == "topics") {
+    } else if (command == "TOPICS") {
         return CommandType::Topic;
-    } else if (command == "post") {
+    } else if (command == "POST") {
         return CommandType::PostMessage;
-    } else if (command == "ping") {
+    } else if (command == "PING") {
         return CommandType::Ping;
     } else {
         return CommandType::Unknown;
