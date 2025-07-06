@@ -29,7 +29,7 @@ private:
     Connection<Socket> connection_;
 };
 
-using YaqClient = YaqClientBase<Socket<boost::asio::ip::tcp>>;
+using YaqClient = YaqClientBase<Socket<boost::asio::ip::tcp::socket>>;
 
 std::unique_ptr<YaqClient> create_yaq_client(const std::string& host, const std::string& port);
 

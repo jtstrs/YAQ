@@ -38,3 +38,5 @@ target_include_directories(${APPLICATION_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${Boost_INCLUDE_DIRS}
 )
+
+add_subdirectory(yaq_client)
