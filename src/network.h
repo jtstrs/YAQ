@@ -28,7 +28,7 @@ public:
         acceptor_.cancel();
     }
 
-    void set_on_new_connection(std::function<void(std::unique_ptr<ClientConnection>)> callback)
+    void set_on_new_connection(std::function<void(std::shared_ptr<ClientConnection>)> callback)
     {
         on_new_connection_ = callback;
     }
@@ -36,7 +36,7 @@ public:
 private:
     Acceptor<AcceptorImpl, Socket<SocketImpl>> acceptor_;
 
-    std::function<void(std::unique_ptr<ClientConnection>)> on_new_connection_;
+    std::function<void(std::shared_ptr<ClientConnection>)> on_new_connection_;
 
     void handle_accept(const boost::system::error_code& error, Socket<SocketImpl> socket)
     {
@@ -45,10 +45,10 @@ private:
             return;
         }
         Logger::getInstance().info("Accepted connection");
-        auto connection = std::make_unique<ClientConnection>(std::move(socket));
+        auto connection = std::make_shared<ClientConnection>(std::move(socket));
 
         if (on_new_connection_) {
-            on_new_connection_(std::move(connection));
+            on_new_connection_(connection);
         }
 
         acceptor_.async_accept([this](const boost::system::error_code& error, Socket<SocketImpl> socket) {

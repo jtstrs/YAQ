@@ -23,8 +23,8 @@ public:
     YaqBase(const std::string& host, int32_t port, ConstructorTag tag)
         : network_(io_context_, host, port)
     {
-        network_.set_on_new_connection([this](std::unique_ptr<typename Network::Connection> connection) {
-            handle_new_connection(std::move(connection));
+        network_.set_on_new_connection([this](std::shared_ptr<typename Network::Connection> connection) {
+            handle_new_connection(connection);
         });
     }
 
@@ -52,16 +52,16 @@ public:
     }
 
 private:
-    void handle_new_connection(std::unique_ptr<typename Network::Connection> connection)
+    void handle_new_connection(std::shared_ptr<typename Network::Connection> connection)
     {
         Logger::getInstance().info("New connection");
         connection->set_on_message_received([this](const std::string& message) {
             handle_message(connections_.back(), message);
         });
-        connections_.push_back(std::move(connection));
+        connections_.push_back(connection);
     }
 
-    void handle_message(const std::unique_ptr<typename Network::Connection>& connection, const std::string& message)
+    void handle_message(const std::shared_ptr<typename Network::Connection>& connection, const std::string& message)
     {
         Logger::getInstance().info("Message: " + message);
         Command command;
@@ -87,12 +87,12 @@ private:
         }
     }
 
-    void handle_ping(const std::unique_ptr<typename Network::Connection>& connection)
+    void handle_ping(const std::shared_ptr<typename Network::Connection>& connection)
     {
         connection->send("PONG");
     }
 
-    std::vector<std::unique_ptr<typename Network::Connection>> connections_;
+    std::vector<std::shared_ptr<typename Network::Connection>> connections_;
     boost::asio::io_context io_context_;
     Network network_;
     Protocol protocol_;
