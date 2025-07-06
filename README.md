@@ -17,12 +17,12 @@ mkdir build && cd build
 
 2. Install dependencies using Conan:
 ```bash
-conan install .. --output-folder=. --build=missing
+conan install .. --output-folder=. --build=missing --profile=${PROFILE WITH REQUIRED BUILD TYPE}
 ```
 
 3. Configure and build the project:
 ```bash
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=${BUILD TYPE}
 cmake --build .
 ```
 
