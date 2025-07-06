@@ -1,4 +1,6 @@
 #include "logger.h"
+#include <chrono>
+#include <iomanip>
 #include <iostream>
 
 Logger::Logger()
@@ -38,8 +40,12 @@ void Logger::error(const std::string& message)
 
 void Logger::log(LogLevel level, const std::string& message)
 {
+    auto now = std::chrono::system_clock::now();
+    auto time_t = std::chrono::system_clock::to_time_t(now);
+    auto tm = *std::localtime(&time_t);
+
     if (level >= log_level_) {
-        std::cout << "[" << levelToString(level) << "] " << message << std::endl;
+        std::cout << "[" << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "] " << "[" << levelToString(level) << "] " << message << std::endl;
     }
 }
 
