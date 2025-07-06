@@ -56,9 +56,9 @@ private:
     {
         Logger::getInstance().info("New connection");
         connection->set_on_message_received([this](const std::string& message) {
-            handle_message(connections_.back(), message);
+            handle_message(connections_pool_.back(), message);
         });
-        connections_.push_back(connection);
+        connections_pool_.push_back(connection);
     }
 
     void handle_message(const std::shared_ptr<typename Network::Connection>& connection, const std::string& message)
@@ -72,8 +72,10 @@ private:
         }
         switch (command.type) {
         case CommandType::Subscribe:
+            handle_subscribe(connection, command.args[0]);
             break;
         case CommandType::Unsubscribe:
+            handle_unsubscribe(connection, command.args[0]);
             break;
         case CommandType::PostMessage:
             break;
@@ -81,6 +83,7 @@ private:
             handle_ping(connection);
             break;
         case CommandType::Topic:
+            // handle_topic(connection);
             break;
         case CommandType::Unknown:
             break;
@@ -92,10 +95,42 @@ private:
         connection->send("PONG");
     }
 
-    std::vector<std::shared_ptr<typename Network::Connection>> connections_;
+    void handle_subscribe(const std::shared_ptr<typename Network::Connection>& connection, const std::string& topic)
+    {
+        topic_subscriptions_[topic].push_back(connection);
+    }
+
+    void handle_unsubscribe(const std::shared_ptr<typename Network::Connection>& connection, const std::string& topic)
+    {
+        auto& topic_connections = topic_subscriptions_[topic];
+        auto subscribed_client = std::find_if(topic_connections.begin(), topic_connections.end(), [connection](const auto& weak_connection) {
+            if (weak_connection.expired()) {
+                return false;
+            }
+            auto locked_connection = weak_connection.lock();
+            return locked_connection == connection;
+        });
+
+        if (subscribed_client != topic_connections.end()) {
+            topic_connections.erase(subscribed_client);
+        }
+    }
+
+    void handle_topic(const std::shared_ptr<typename Network::Connection>& connection)
+    {
+        std::stringstream topics_builder;
+        std::for_each(topic_subscriptions_.begin(), topic_subscriptions_.end(), [&topics_builder](const auto& topic_connections) {
+            topics_builder << topic_connections.first << ",";
+        });
+        connection->send("TOPIC " + topics_builder.str());
+    }
+
     boost::asio::io_context io_context_;
     Network network_;
     Protocol protocol_;
+
+    std::vector<std::shared_ptr<typename Network::Connection>> connections_pool_;
+    std::unordered_map<std::string, std::vector<std::weak_ptr<typename Network::Connection>>> topic_subscriptions_;
 };
 
 // Use boost::asio::ip::tcp::acceptor by default

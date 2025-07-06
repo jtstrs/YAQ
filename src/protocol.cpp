@@ -29,7 +29,7 @@ Command Protocol::parse(const std::string& command)
     std::stringstream ss(command);
 
     CommandType type = CommandType::Unknown;
-    std::vector<std::variant<std::string>> args;
+    std::vector<std::string> args;
 
     // Read the first token (command type)
     if (std::getline(ss, token, ',')) {

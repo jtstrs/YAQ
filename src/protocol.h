@@ -18,7 +18,7 @@ std::string to_string(CommandType type);
 
 struct Command {
     CommandType type;
-    std::vector<std::variant<std::string>> args;
+    std::vector<std::string> args;
 
     Command()
         : type(CommandType::Unknown)
@@ -26,7 +26,7 @@ struct Command {
     {
     }
 
-    Command(CommandType type, std::vector<std::variant<std::string>> args)
+    Command(CommandType type, std::vector<std::string> args)
         : type(type)
         , args(args)
     {

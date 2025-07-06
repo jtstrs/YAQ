@@ -12,7 +12,7 @@ TEST_F(ProtocolTest, ValidSubscribeCommand)
     auto cmd = protocol.parse("SUBSCRIBE, news");
     EXPECT_EQ(cmd.type, CommandType::Subscribe);
     EXPECT_EQ(cmd.args.size(), 1);
-    EXPECT_EQ(std::get<std::string>(cmd.args[0]), "news");
+    EXPECT_EQ(cmd.args[0], "news");
 }
 
 TEST_F(ProtocolTest, ValidUnsubscribeCommand)
@@ -20,7 +20,7 @@ TEST_F(ProtocolTest, ValidUnsubscribeCommand)
     auto cmd = protocol.parse("UNSUBSCRIBE, sports");
     EXPECT_EQ(cmd.type, CommandType::Unsubscribe);
     EXPECT_EQ(cmd.args.size(), 1);
-    EXPECT_EQ(std::get<std::string>(cmd.args[0]), "sports");
+    EXPECT_EQ(cmd.args[0], "sports");
 }
 
 TEST_F(ProtocolTest, ValidTopicsCommand)
@@ -35,8 +35,8 @@ TEST_F(ProtocolTest, ValidPostMessageCommand)
     auto cmd = protocol.parse("POST, tech, New release available");
     EXPECT_EQ(cmd.type, CommandType::PostMessage);
     EXPECT_EQ(cmd.args.size(), 2);
-    EXPECT_EQ(std::get<std::string>(cmd.args[0]), "tech");
-    EXPECT_EQ(std::get<std::string>(cmd.args[1]), "New release available");
+    EXPECT_EQ(cmd.args[0], "tech");
+    EXPECT_EQ(cmd.args[1], "New release available");
 }
 
 TEST_F(ProtocolTest, ValidPingCommand)
@@ -88,7 +88,7 @@ TEST_F(ProtocolTest, ExtraSpaces)
     auto cmd = protocol.parse("  SUBSCRIBE  ,  news  ");
     EXPECT_EQ(cmd.type, CommandType::Subscribe);
     EXPECT_EQ(cmd.args.size(), 1);
-    EXPECT_EQ(std::get<std::string>(cmd.args[0]), "news");
+    EXPECT_EQ(cmd.args[0], "news");
 }
 
 // Test command parsing with multiple spaces between arguments
@@ -97,8 +97,8 @@ TEST_F(ProtocolTest, MultipleSpaces)
     auto cmd = protocol.parse("POST, tech, New   release   available");
     EXPECT_EQ(cmd.type, CommandType::PostMessage);
     EXPECT_EQ(cmd.args.size(), 2);
-    EXPECT_EQ(std::get<std::string>(cmd.args[0]), "tech");
-    EXPECT_EQ(std::get<std::string>(cmd.args[1]), "New   release   available");
+    EXPECT_EQ(cmd.args[0], "tech");
+    EXPECT_EQ(cmd.args[1], "New   release   available");
 }
 
 // Test command parsing with multiple spaces between arguments
