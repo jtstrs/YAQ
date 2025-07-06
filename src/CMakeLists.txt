@@ -30,6 +30,7 @@ target_link_libraries(${APPLICATION_NAME}
     PRIVATE
         yaq_lib
         ${GTest_LIBRARIES}
+        $<$<PLATFORM_ID:Linux,Darwin>:pthread>
 )
 
 target_include_directories(${APPLICATION_NAME} 
