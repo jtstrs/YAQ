@@ -11,7 +11,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo 'Running Tests...'
-                sh 'docker run -it yaq-app ./build/tests/yaq_tests'
+                sh 'docker run -it --rm yaq-app tests/YAQ_tests'
             }
         }
     }
