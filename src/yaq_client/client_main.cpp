@@ -1,6 +1,7 @@
 #include "client.h"
-#include <exception>
+#include <boost/asio/post.hpp>
 #include <iostream>
+#include <thread>
 
 int main(int32_t argc, char** argv)
 {
@@ -15,7 +16,23 @@ int main(int32_t argc, char** argv)
         std::cout << "Response: " << response << std::endl;
     });
 
-    client->ping();
+    std::thread thread([&io_context]() {
+        io_context.run();
+    });
 
-    io_context.run();
+    std::string command;
+    while (true) {
+        std::getline(std::cin, command);
+        if (command == "exit") {
+            break;
+        }
+        if (command == "ping") {
+            boost::asio::post(io_context, [&client]() {
+                client->ping();
+            });
+        }
+    }
+
+    io_context.stop();
+    thread.join();
 }
