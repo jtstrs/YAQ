@@ -89,7 +89,6 @@ private:
 
     void handle_ping(const std::unique_ptr<typename Network::Connection>& connection)
     {
-        Logger::getInstance().info("Ping");
         connection->send("PONG");
     }
 
