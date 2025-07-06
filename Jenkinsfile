@@ -1,9 +1,17 @@
 pipeline {
     agent any
     stages {
-        stage('Build') {
+        stage('Build Application') {
             steps {
-                echo 'Building...'
+                echo 'Building Application...'
+                sh 'docker build --no-cache -progress=plain -t yaq-app .'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                echo 'Running Tests...'
+                sh 'docker run -it yaq-app ./build/tests/yaq_tests'
             }
         }
     }
