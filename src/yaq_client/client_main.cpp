@@ -9,8 +9,9 @@ int main(int32_t argc, char** argv)
     }
 
     auto client = create_yaq_client(argv[1], argv[2]);
-    client->ping();
     client->set_on_response_received([](const std::string& response) {
         std::cout << "Response: " << response << std::endl;
     });
+
+    client->ping();
 }

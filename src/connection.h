@@ -34,6 +34,7 @@ public:
             if (error) {
                 Logger::getInstance().error("Connection::send error: " + error.message());
             }
+            Logger::getInstance().info("Connection::send " + std::to_string(bytes_transferred) + " bytes");
         });
     }
 
