@@ -31,6 +31,6 @@ private:
 
 using YaqClient = YaqClientBase<Socket<boost::asio::ip::tcp::socket>>;
 
-std::unique_ptr<YaqClient> create_yaq_client(const std::string& host, const std::string& port);
+std::unique_ptr<YaqClient> create_yaq_client(boost::asio::io_context& io_context, const std::string& host, const std::string& port);
 
 #endif // YAQ_CLIENT_CLIENT_H

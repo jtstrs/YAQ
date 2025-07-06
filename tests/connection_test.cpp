@@ -9,20 +9,17 @@ TEST(ConnectionTest, CreateConnection)
 
 TEST(ConnectionTest, AcceptConnectionSucces)
 {
-    Connection<FakeSocketReceiveSuccess> connection((FakeSocketReceiveSuccess()));
-    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
+    ASSERT_NO_FATAL_FAILURE({ Connection<FakeSocketReceiveSuccess> connection((FakeSocketReceiveSuccess())); });
 }
 
 TEST(ConnectionTest, AcceptConnectionEof)
 {
-    Connection<FakeSocketReceiveEof> connection((FakeSocketReceiveEof()));
-    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
+    ASSERT_NO_FATAL_FAILURE({ Connection<FakeSocketReceiveEof> connection((FakeSocketReceiveEof())); });
 }
 
 TEST(ConnectionTest, AcceptConnectionError)
 {
-    Connection<FakeSocketReceiveError> connection((FakeSocketReceiveError()));
-    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
+    ASSERT_NO_FATAL_FAILURE({ Connection<FakeSocketReceiveError> connection((FakeSocketReceiveError())); });
 }
 
 struct MessageSource {
@@ -32,9 +29,10 @@ struct MessageSource {
 TEST(ConnectionTest, OnMessageCallback)
 {
     using ConnectionType = Connection<FakeSocketSuccessReceiveMessage<MessageSource>>;
-    ConnectionType connection((FakeSocketSuccessReceiveMessage<MessageSource>()));
-    connection.set_on_message_received([](const std::string& message) {
-        EXPECT_EQ(message, "test");
+    ASSERT_NO_FATAL_FAILURE({
+        ConnectionType connection((FakeSocketSuccessReceiveMessage<MessageSource>()));
+        connection.set_on_message_received([](const std::string& message) {
+            EXPECT_EQ(message, "test");
+        });
     });
-    ASSERT_NO_FATAL_FAILURE({ connection.accepted(); });
 }
