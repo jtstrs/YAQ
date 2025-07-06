@@ -4,7 +4,7 @@ pipeline {
         stage('Build Application') {
             steps {
                 echo 'Building Application...'
-                sh 'docker build --no-cache -progress=plain -t yaq-app .'
+                sh 'docker build --no-cache --progress=plain -t yaq-app .'
             }
         }
 
