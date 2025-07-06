@@ -9,7 +9,7 @@ protected:
 // Test valid commands
 TEST_F(ProtocolTest, ValidSubscribeCommand)
 {
-    auto cmd = protocol.parse("subscribe, news");
+    auto cmd = protocol.parse("SUBSCRIBE, news");
     EXPECT_EQ(cmd.type, CommandType::Subscribe);
     EXPECT_EQ(cmd.args.size(), 1);
     EXPECT_EQ(std::get<std::string>(cmd.args[0]), "news");
@@ -17,7 +17,7 @@ TEST_F(ProtocolTest, ValidSubscribeCommand)
 
 TEST_F(ProtocolTest, ValidUnsubscribeCommand)
 {
-    auto cmd = protocol.parse("unsubscribe, sports");
+    auto cmd = protocol.parse("UNSUBSCRIBE, sports");
     EXPECT_EQ(cmd.type, CommandType::Unsubscribe);
     EXPECT_EQ(cmd.args.size(), 1);
     EXPECT_EQ(std::get<std::string>(cmd.args[0]), "sports");
@@ -25,14 +25,14 @@ TEST_F(ProtocolTest, ValidUnsubscribeCommand)
 
 TEST_F(ProtocolTest, ValidTopicsCommand)
 {
-    auto cmd = protocol.parse("topics");
+    auto cmd = protocol.parse("TOPICS");
     EXPECT_EQ(cmd.type, CommandType::Topic);
     EXPECT_EQ(cmd.args.size(), 0);
 }
 
 TEST_F(ProtocolTest, ValidPostMessageCommand)
 {
-    auto cmd = protocol.parse("post, tech, New release available");
+    auto cmd = protocol.parse("POST, tech, New release available");
     EXPECT_EQ(cmd.type, CommandType::PostMessage);
     EXPECT_EQ(cmd.args.size(), 2);
     EXPECT_EQ(std::get<std::string>(cmd.args[0]), "tech");
@@ -41,7 +41,7 @@ TEST_F(ProtocolTest, ValidPostMessageCommand)
 
 TEST_F(ProtocolTest, ValidPingCommand)
 {
-    auto cmd = protocol.parse("ping");
+    auto cmd = protocol.parse("PING");
     EXPECT_EQ(cmd.type, CommandType::Ping);
     EXPECT_EQ(cmd.args.size(), 0);
 }
@@ -55,37 +55,37 @@ TEST_F(ProtocolTest, InvalidCommandType)
 
 TEST_F(ProtocolTest, InvalidSubscribeArguments)
 {
-    EXPECT_THROW(protocol.parse("subscribe"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("subscribe, news, sports"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("SUBSCRIBE"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("SUBSCRIBE, news, sports"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidUnsubscribeArguments)
 {
-    EXPECT_THROW(protocol.parse("unsubscribe"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("unsubscribe, news, sports"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("UNSUBSCRIBE"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("UNSUBSCRIBE, news, sports"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidPostMessageArguments)
 {
-    EXPECT_THROW(protocol.parse("post"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("post, news"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("post, news, message, extra"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("POST"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("POST, news"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("POST, news, message, extra"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidTopicsArguments)
 {
-    EXPECT_THROW(protocol.parse("topics, news"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("TOPICS, news"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidPingArguments)
 {
-    EXPECT_THROW(protocol.parse("ping, server"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("PING, server"), std::runtime_error);
 }
 
 // Test command parsing with extra spaces
 TEST_F(ProtocolTest, ExtraSpaces)
 {
-    auto cmd = protocol.parse("  subscribe  ,  news  ");
+    auto cmd = protocol.parse("  SUBSCRIBE  ,  news  ");
     EXPECT_EQ(cmd.type, CommandType::Subscribe);
     EXPECT_EQ(cmd.args.size(), 1);
     EXPECT_EQ(std::get<std::string>(cmd.args[0]), "news");
@@ -94,7 +94,7 @@ TEST_F(ProtocolTest, ExtraSpaces)
 // Test command parsing with multiple spaces between arguments
 TEST_F(ProtocolTest, MultipleSpaces)
 {
-    auto cmd = protocol.parse("post, tech, New   release   available");
+    auto cmd = protocol.parse("POST, tech, New   release   available");
     EXPECT_EQ(cmd.type, CommandType::PostMessage);
     EXPECT_EQ(cmd.args.size(), 2);
     EXPECT_EQ(std::get<std::string>(cmd.args[0]), "tech");
@@ -104,15 +104,15 @@ TEST_F(ProtocolTest, MultipleSpaces)
 // Test command parsing with multiple spaces between arguments
 TEST_F(ProtocolTest, TooManyPostsArguments)
 {
-    EXPECT_THROW(protocol.parse("post, tech, New release available, extra"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("POST, tech, New release available, extra"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, TooManyTopicsArguments)
 {
-    EXPECT_THROW(protocol.parse("topics, news, extra"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("TOPICS, news, extra"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, TooManyPingArguments)
 {
-    EXPECT_THROW(protocol.parse("ping, server, extra"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("PING, server, extra"), std::runtime_error);
 }
