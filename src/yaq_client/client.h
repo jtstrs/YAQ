@@ -20,6 +20,21 @@ public:
         connection_.send("PING");
     }
 
+    void subscribe(const std::string& topic)
+    {
+        connection_.send("SUBSCRIBE " + topic);
+    }
+
+    void unsubscribe(const std::string& topic)
+    {
+        connection_.send("UNSUBSCRIBE " + topic);
+    }
+
+    void topics()
+    {
+        connection_.send("TOPICS");
+    }
+
     void set_on_response_received(std::function<void(const std::string&)> callback)
     {
         connection_.set_on_message_received(callback);

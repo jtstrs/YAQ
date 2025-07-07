@@ -1,6 +1,7 @@
 #include "client.h"
 #include <boost/asio/post.hpp>
 #include <iostream>
+#include <string>
 #include <thread>
 
 int main(int32_t argc, char** argv)
@@ -21,14 +22,33 @@ int main(int32_t argc, char** argv)
     });
 
     std::string command;
+    std::string arg1;
+    std::string arg2;
+
     while (true) {
-        std::getline(std::cin, command);
+        std::string buffer;
+        std::getline(std::cin, buffer);
+
+        std::stringstream ss(buffer);
+        ss >> command >> arg1 >> arg2;
+
         if (command == "exit") {
             break;
         }
+
         if (command == "ping") {
             boost::asio::post(io_context, [&client]() {
                 client->ping();
+            });
+        }
+        if (command == "subscribe" && !arg1.empty()) {
+            boost::asio::post(io_context, [&client, arg1]() {
+                client->subscribe(arg1);
+            });
+        }
+        if (command == "topics") {
+            boost::asio::post(io_context, [&client]() {
+                client->topics();
             });
         }
     }
