@@ -1,9 +1,3 @@
-# Source subdirectory CMakeLists.txt
-
-# Find Boost dependency
-find_package(Boost REQUIRED format)
-find_package(jsoncpp REQUIRED)
-
 # Source files for the library
 set(src_files
     ini_config_reader.cpp
@@ -31,7 +25,7 @@ add_executable(${APPLICATION_NAME}
 target_link_libraries(${APPLICATION_NAME}
     PRIVATE
         yaq_lib
-        JsonCpp::JsonCpp
+        ${jsoncpp_LIBRARIES}
         ${GTest_LIBRARIES}
         $<$<PLATFORM_ID:Linux,Darwin>:pthread>
 )

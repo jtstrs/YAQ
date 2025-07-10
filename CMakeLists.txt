@@ -9,6 +9,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 
+
+# Find dependencies
+find_package(Boost REQUIRED format)
+find_package(jsoncpp REQUIRED)
+find_package(GTest REQUIRED)
+
 # Add subdirectories
 add_subdirectory(src)
 add_subdirectory(tests)
