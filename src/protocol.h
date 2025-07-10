@@ -1,8 +1,8 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#include "json/json.h"
 #include <string>
-#include <variant>
 #include <vector>
 
 enum class CommandType {
@@ -13,8 +13,6 @@ enum class CommandType {
     Ping, // ping
     Unknown
 };
-
-std::string to_string(CommandType type);
 
 struct Command {
     CommandType type;
@@ -38,6 +36,8 @@ public:
     Command parse(const std::string& command);
 
 private:
+    Command extract_command(const Json::Value& root);
+    void validate(const Json::Value& root);
     CommandType parse_command_type(const std::string& command);
 };
 

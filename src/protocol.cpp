@@ -1,90 +1,98 @@
 #include "protocol.h"
 #include "utils.h"
+#include <algorithm>
 
-#include <sstream>
-#include <vector>
-
-std::string to_string(CommandType type)
-{
-    switch (type) {
-    case CommandType::Subscribe:
-        return "SUBSCRIBE";
-    case CommandType::Unsubscribe:
-        return "UNSUBSCRIBE";
-    case CommandType::Topic:
-        return "TOPICS";
-    case CommandType::PostMessage:
-        return "POST";
-    case CommandType::Ping:
-        return "PING";
-    case CommandType::Unknown:
-        return "UNKNOWN";
-    }
-    throw std::runtime_error("Invalid command type");
-}
+constexpr std::string_view COMMAND_FIELD_KEY = "command";
+constexpr std::string_view ARGS_FIELD_KEY = "args";
 
 Command Protocol::parse(const std::string& command)
 {
-    std::string token;
-    std::stringstream ss(command);
+    if (command.empty()) {
+        throw std::runtime_error("Command is empty");
+    }
 
-    CommandType type = CommandType::Unknown;
+    Json::CharReaderBuilder builder;
+    const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    Json::Value root;
+    std::string errors;
+
+    const bool success = reader->parse(command.c_str(), command.c_str() + command.size(), &root, &errors);
+    if (!success) {
+        throw std::runtime_error("Failed to parse command. Parsing error: " + errors);
+    }
+
+    validate(root);
+
+    return extract_command(root);
+}
+
+Command Protocol::extract_command(const Json::Value& root)
+{
+    const std::string command = utils::to_lower(root.get(COMMAND_FIELD_KEY.data(), "").asString());
+    const CommandType command_type = parse_command_type(command);
+
+    if (command_type == CommandType::Unknown) {
+        throw std::runtime_error("Unknown command type: " + command);
+    }
+
+    const Json::Value args_storage = root.get(ARGS_FIELD_KEY.data(), "");
+
     std::vector<std::string> args;
+    args.reserve(args_storage.size());
 
-    // Read the first token (command type)
-    if (std::getline(ss, token, ',')) {
-        token = utils::trim(token);
-        if (!token.empty()) {
-            type = parse_command_type(token);
+    std::transform(args_storage.begin(), args_storage.end(), std::back_inserter(args), [](const Json::Value& value) {
+        if (!value.isString()) {
+            return value.asString();
+        } else if (value.isInt()) {
+            return std::to_string(value.asInt());
+        } else if (value.isDouble()) {
+            return std::to_string(value.asDouble());
+        } else if (value.isBool()) {
+            return std::to_string(value.asBool());
         }
+        throw std::runtime_error("Command args is not convertible to string");
+    });
+
+    return Command(command_type, args);
+}
+
+void Protocol::validate(const Json::Value& root)
+{
+    if (root.empty()) {
+        throw std::runtime_error("Command is empty");
     }
 
-    if (type == CommandType::Unknown) {
-        throw std::runtime_error("Invalid command");
+    if (!root.isMember(COMMAND_FIELD_KEY.data())) {
+        throw std::runtime_error("Command type is missing");
     }
 
-    // Read remaining tokens (arguments)
-    while (std::getline(ss, token, ',')) {
-        token = utils::trim(token);
-        if (!token.empty()) {
-            args.push_back(token);
-        }
+    if (!root.get(COMMAND_FIELD_KEY.data(), "").isString()) {
+        throw std::runtime_error("Command type is not a string");
     }
 
-    if (type == CommandType::Subscribe || type == CommandType::Unsubscribe) {
-        if (args.size() != 1) {
-            throw std::runtime_error("Mismatch number of arguments for command: " + to_string(type));
-        }
+    if (!root.isMember(ARGS_FIELD_KEY.data())) {
+        throw std::runtime_error("Command args is missing");
     }
 
-    if (type == CommandType::PostMessage) {
-        if (args.size() != 2) {
-            throw std::runtime_error("Mismatch number of arguments for command: " + to_string(type));
-        }
+    if (!root.get(ARGS_FIELD_KEY.data(), "").isArray()) {
+        throw std::runtime_error("Command args is not an array");
     }
-
-    if (type == CommandType::Ping || type == CommandType::Topic) {
-        if (args.size() != 0) {
-            throw std::runtime_error("Mismatch number of arguments for command: " + to_string(type));
-        }
-    }
-
-    return Command(type, args);
 }
 
 CommandType Protocol::parse_command_type(const std::string& command)
 {
-    if (command == "SUBSCRIBE") {
+    if (command == "subscribe") {
         return CommandType::Subscribe;
-    } else if (command == "UNSUBSCRIBE") {
+    } else if (command == "unsubscribe") {
         return CommandType::Unsubscribe;
-    } else if (command == "TOPICS") {
+    } else if (command == "topics") {
         return CommandType::Topic;
-    } else if (command == "POST") {
+    } else if (command == "post") {
         return CommandType::PostMessage;
-    } else if (command == "PING") {
+    } else if (command == "ping") {
         return CommandType::Ping;
     } else {
         return CommandType::Unknown;
     }
+    throw std::runtime_error("Unknown command type: " + command);
 }
