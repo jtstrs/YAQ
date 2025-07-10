@@ -41,7 +41,7 @@ Command Protocol::extract_command(const Json::Value& root)
     args.reserve(args_storage.size());
 
     std::transform(args_storage.begin(), args_storage.end(), std::back_inserter(args), [](const Json::Value& value) {
-        if (!value.isString()) {
+        if (value.isString()) {
             return value.asString();
         } else if (value.isInt()) {
             return std::to_string(value.asInt());
@@ -52,6 +52,9 @@ Command Protocol::extract_command(const Json::Value& root)
         }
         throw std::runtime_error("Command args is not convertible to string");
     });
+
+    // Validate argument count for each command type
+    validate_argument_count(command_type, args);
 
     return Command(command_type, args);
 }
@@ -79,6 +82,39 @@ void Protocol::validate(const Json::Value& root)
     }
 }
 
+void Protocol::validate_argument_count(CommandType command_type, const std::vector<std::string>& args)
+{
+    switch (command_type) {
+    case CommandType::Subscribe:
+        if (args.size() != 1) {
+            throw std::runtime_error("Subscribe command requires exactly 1 argument");
+        }
+        break;
+    case CommandType::Unsubscribe:
+        if (args.size() != 1) {
+            throw std::runtime_error("Unsubscribe command requires exactly 1 argument");
+        }
+        break;
+    case CommandType::Topic:
+        if (args.size() != 0) {
+            throw std::runtime_error("Topics command requires no arguments");
+        }
+        break;
+    case CommandType::PostMessage:
+        if (args.size() != 2) {
+            throw std::runtime_error("Post command requires exactly 2 arguments");
+        }
+        break;
+    case CommandType::Ping:
+        if (args.size() != 0) {
+            throw std::runtime_error("Ping command requires no arguments");
+        }
+        break;
+    case CommandType::Unknown:
+        throw std::runtime_error("Unknown command type");
+    }
+}
+
 CommandType Protocol::parse_command_type(const std::string& command)
 {
     if (command == "subscribe") {
@@ -94,5 +130,4 @@ CommandType Protocol::parse_command_type(const std::string& command)
     } else {
         return CommandType::Unknown;
     }
-    throw std::runtime_error("Unknown command type: " + command);
 }

@@ -9,7 +9,7 @@ protected:
 // Test valid commands
 TEST_F(ProtocolTest, ValidSubscribeCommand)
 {
-    auto cmd = protocol.parse("SUBSCRIBE, news");
+    auto cmd = protocol.parse("{\"command\": \"subscribe\", \"args\": [\"news\"]}");
     EXPECT_EQ(cmd.type, CommandType::Subscribe);
     EXPECT_EQ(cmd.args.size(), 1);
     EXPECT_EQ(cmd.args[0], "news");
@@ -17,7 +17,7 @@ TEST_F(ProtocolTest, ValidSubscribeCommand)
 
 TEST_F(ProtocolTest, ValidUnsubscribeCommand)
 {
-    auto cmd = protocol.parse("UNSUBSCRIBE, sports");
+    auto cmd = protocol.parse("{\"command\": \"unsubscribe\", \"args\": [\"sports\"]}");
     EXPECT_EQ(cmd.type, CommandType::Unsubscribe);
     EXPECT_EQ(cmd.args.size(), 1);
     EXPECT_EQ(cmd.args[0], "sports");
@@ -25,14 +25,14 @@ TEST_F(ProtocolTest, ValidUnsubscribeCommand)
 
 TEST_F(ProtocolTest, ValidTopicsCommand)
 {
-    auto cmd = protocol.parse("TOPICS");
+    auto cmd = protocol.parse("{\"command\": \"topics\", \"args\": []}");
     EXPECT_EQ(cmd.type, CommandType::Topic);
     EXPECT_EQ(cmd.args.size(), 0);
 }
 
 TEST_F(ProtocolTest, ValidPostMessageCommand)
 {
-    auto cmd = protocol.parse("POST, tech, New release available");
+    auto cmd = protocol.parse("{\"command\": \"post\", \"args\": [\"tech\", \"New release available\"]}");
     EXPECT_EQ(cmd.type, CommandType::PostMessage);
     EXPECT_EQ(cmd.args.size(), 2);
     EXPECT_EQ(cmd.args[0], "tech");
@@ -41,7 +41,7 @@ TEST_F(ProtocolTest, ValidPostMessageCommand)
 
 TEST_F(ProtocolTest, ValidPingCommand)
 {
-    auto cmd = protocol.parse("PING");
+    auto cmd = protocol.parse("{\"command\": \"ping\", \"args\": []}");
     EXPECT_EQ(cmd.type, CommandType::Ping);
     EXPECT_EQ(cmd.args.size(), 0);
 }
@@ -49,70 +49,107 @@ TEST_F(ProtocolTest, ValidPingCommand)
 // Test invalid commands
 TEST_F(ProtocolTest, InvalidCommandType)
 {
-    EXPECT_THROW(protocol.parse("invalid"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("unknown"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"invalid\", \"args\": []}"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"unknown\", \"args\": []}"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidSubscribeArguments)
 {
-    EXPECT_THROW(protocol.parse("SUBSCRIBE"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("SUBSCRIBE, news, sports"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"subscribe\", \"args\": []}"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"subscribe\", \"args\": [\"news\", \"sports\"]}"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidUnsubscribeArguments)
 {
-    EXPECT_THROW(protocol.parse("UNSUBSCRIBE"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("UNSUBSCRIBE, news, sports"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"unsubscribe\", \"args\": []}"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"unsubscribe\", \"args\": [\"news\", \"sports\"]}"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidPostMessageArguments)
 {
-    EXPECT_THROW(protocol.parse("POST"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("POST, news"), std::runtime_error);
-    EXPECT_THROW(protocol.parse("POST, news, message, extra"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"post\", \"args\": []}"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"post\", \"args\": [\"news\"]}"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"post\", \"args\": [\"news\", \"message\", \"extra\"]}"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidTopicsArguments)
 {
-    EXPECT_THROW(protocol.parse("TOPICS, news"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"topics\", \"args\": [\"news\"]}"), std::runtime_error);
 }
 
 TEST_F(ProtocolTest, InvalidPingArguments)
 {
-    EXPECT_THROW(protocol.parse("PING, server"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{\"command\": \"ping\", \"args\": [\"server\"]}"), std::runtime_error);
 }
 
-// Test command parsing with extra spaces
-TEST_F(ProtocolTest, ExtraSpaces)
+// Test JSON parsing errors
+TEST_F(ProtocolTest, InvalidJsonFormat)
 {
-    auto cmd = protocol.parse("  SUBSCRIBE  ,  news  ");
-    EXPECT_EQ(cmd.type, CommandType::Subscribe);
-    EXPECT_EQ(cmd.args.size(), 1);
-    EXPECT_EQ(cmd.args[0], "news");
+    EXPECT_THROW(protocol.parse("invalid json"), std::runtime_error);
+    EXPECT_THROW(protocol.parse("{invalid}"), std::runtime_error);
+    EXPECT_THROW(protocol.parse(""), std::runtime_error);
 }
 
-// Test command parsing with multiple spaces between arguments
-TEST_F(ProtocolTest, MultipleSpaces)
+TEST_F(ProtocolTest, MissingCommandField)
 {
-    auto cmd = protocol.parse("POST, tech, New   release   available");
+    EXPECT_THROW(protocol.parse("{\"args\": [\"news\"]}"), std::runtime_error);
+}
+
+TEST_F(ProtocolTest, MissingArgsField)
+{
+    EXPECT_THROW(protocol.parse("{\"command\": \"subscribe\"}"), std::runtime_error);
+}
+
+TEST_F(ProtocolTest, InvalidCommandTypeField)
+{
+    EXPECT_THROW(protocol.parse("{\"command\": 123, \"args\": []}"), std::runtime_error);
+}
+
+TEST_F(ProtocolTest, InvalidArgsField)
+{
+    EXPECT_THROW(protocol.parse("{\"command\": \"subscribe\", \"args\": \"not_an_array\"}"), std::runtime_error);
+}
+
+// Test command parsing with different data types in args
+TEST_F(ProtocolTest, ArgsWithDifferentTypes)
+{
+    // Test with a command that accepts exactly 2 arguments but verify type conversion
+    auto cmd = protocol.parse("{\"command\": \"post\", \"args\": [\"topic\", 123]}");
     EXPECT_EQ(cmd.type, CommandType::PostMessage);
     EXPECT_EQ(cmd.args.size(), 2);
-    EXPECT_EQ(cmd.args[0], "tech");
-    EXPECT_EQ(cmd.args[1], "New   release   available");
+    EXPECT_EQ(cmd.args[0], "topic");
+    EXPECT_EQ(cmd.args[1], "123");
 }
 
-// Test command parsing with multiple spaces between arguments
-TEST_F(ProtocolTest, TooManyPostsArguments)
+// Test data type conversion for different types
+TEST_F(ProtocolTest, DataTypeConversion)
 {
-    EXPECT_THROW(protocol.parse("POST, tech, New release available, extra"), std::runtime_error);
+    // Test int conversion
+    auto cmd1 = protocol.parse("{\"command\": \"post\", \"args\": [\"topic\", 123]}");
+    EXPECT_EQ(cmd1.args[1], "123");
+
+    // Test double conversion
+    auto cmd2 = protocol.parse("{\"command\": \"post\", \"args\": [\"topic\", 45.67]}");
+    const std::string expected = "45.67";
+    EXPECT_TRUE(cmd2.args[1].find(expected) != std::string::npos);
+
+    // Test bool conversion
+    auto cmd3 = protocol.parse("{\"command\": \"post\", \"args\": [\"topic\", true]}");
+    EXPECT_EQ(cmd3.args[1], "1");
+
+    auto cmd4 = protocol.parse("{\"command\": \"post\", \"args\": [\"topic\", false]}");
+    EXPECT_EQ(cmd4.args[1], "0");
 }
 
-TEST_F(ProtocolTest, TooManyTopicsArguments)
+// Test case insensitive command parsing
+TEST_F(ProtocolTest, CaseInsensitiveCommands)
 {
-    EXPECT_THROW(protocol.parse("TOPICS, news, extra"), std::runtime_error);
-}
+    auto cmd1 = protocol.parse("{\"command\": \"SUBSCRIBE\", \"args\": [\"news\"]}");
+    EXPECT_EQ(cmd1.type, CommandType::Subscribe);
 
-TEST_F(ProtocolTest, TooManyPingArguments)
-{
-    EXPECT_THROW(protocol.parse("PING, server, extra"), std::runtime_error);
+    auto cmd2 = protocol.parse("{\"command\": \"Subscribe\", \"args\": [\"news\"]}");
+    EXPECT_EQ(cmd2.type, CommandType::Subscribe);
+
+    auto cmd3 = protocol.parse("{\"command\": \"subscribe\", \"args\": [\"news\"]}");
+    EXPECT_EQ(cmd3.type, CommandType::Subscribe);
 }
