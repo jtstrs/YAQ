@@ -9,6 +9,3 @@ CMakeToolchain
 
 [options]
 gtest/:shared=True 
-
-[layout]
-cmake_layout
