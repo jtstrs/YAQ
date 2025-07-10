@@ -10,4 +10,5 @@ target_link_libraries(${APPLICATION_NAME}_client
     PRIVATE
         yaq_lib
         ${Boost_LIBRARIES}
+        ${jsoncpp_LIBRARIES}
 )
