@@ -1,4 +1,5 @@
 #include "protocol.h"
+#include "logger.h"
 #include "utils.h"
 #include <algorithm>
 
@@ -7,6 +8,8 @@ constexpr std::string_view ARGS_FIELD_KEY = "args";
 
 Command Protocol::parse(const std::string& command)
 {
+    Logger::getInstance().debug("Parsing command: " + command);
+
     if (command.empty()) {
         throw std::runtime_error("Command is empty");
     }
