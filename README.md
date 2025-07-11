@@ -32,3 +32,6 @@ Or run the test executable directly:
 ```bash
 ./YAQ_tests
 ```
+
+Bugs:
+- Post command dont send message to all clients
