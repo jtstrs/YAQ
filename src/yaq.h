@@ -10,6 +10,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -78,12 +79,13 @@ private:
             handle_unsubscribe(connection, command.args[0]);
             break;
         case CommandType::PostMessage:
+            handle_post_message(connection, command.args[0], command.args[1]);
             break;
         case CommandType::Ping:
             handle_ping(connection);
             break;
         case CommandType::Topic:
-            // handle_topic(connection);
+            handle_topic(connection);
             break;
         case CommandType::Unknown:
             break;
@@ -123,6 +125,42 @@ private:
             topics_builder << topic_connections.first << ",";
         });
         connection->send("TOPIC " + topics_builder.str());
+    }
+
+    void handle_post_message(const std::shared_ptr<typename Network::Connection>& connection, const std::string& topic, const std::string& message)
+    {
+        Logger::getInstance().info("Posting message to topic: " + topic + " - " + message);
+
+        auto topic_it = topic_subscriptions_.find(topic);
+        if (topic_it == topic_subscriptions_.end()) {
+            Logger::getInstance().info("No subscribers for topic: " + topic);
+            return;
+        }
+
+        // Build the message to send to subscribers
+        std::string post_message = "POST " + topic + " " + message;
+
+        // Send message to all subscribers of this topic
+        auto& topic_connections = topic_it->second;
+        auto it = topic_connections.begin();
+        while (it != topic_connections.end()) {
+            if (it->expired()) {
+                // Remove expired connections
+                it = topic_connections.erase(it);
+            } else {
+                auto locked_connection = it->lock();
+                if (locked_connection) {
+                    Logger::getInstance().info("Sending message to subscriber: " + post_message);
+                    locked_connection->send(post_message);
+                }
+                ++it;
+            }
+        }
+
+        // Clean up empty topic if no subscribers remain
+        if (topic_connections.empty()) {
+            topic_subscriptions_.erase(topic_it);
+        }
     }
 
     boost::asio::io_context io_context_;
