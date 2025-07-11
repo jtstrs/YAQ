@@ -7,6 +7,24 @@
 
 namespace utils {
 
+// Convert a string to lower case
+inline std::string to_lower(std::string s)
+{
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+    return s;
+}
+
+// Convert a string to upper case
+inline std::string to_upper(std::string s)
+{
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+        return std::toupper(c);
+    });
+    return s;
+}
+
 // Trim whitespace from the left side of a string
 inline std::string ltrim(std::string s)
 {

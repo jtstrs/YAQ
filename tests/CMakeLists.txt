@@ -1,8 +1,3 @@
-# Tests subdirectory CMakeLists.txt
-
-# Find GTest dependency
-find_package(GTest REQUIRED)
-
 # Test source files
 set(test_files
     init_config_reader_test.cpp
@@ -25,6 +20,7 @@ add_executable(${TEST_APP_NAME}
 target_link_libraries(${TEST_APP_NAME}
     PRIVATE
         ${GTest_LIBRARIES}
+        ${jsoncpp_LIBRARIES}
         yaq_lib
 )
 target_include_directories(${TEST_APP_NAME} PRIVATE ${Boost_INCLUDE_DIRS})

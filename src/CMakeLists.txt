@@ -1,8 +1,3 @@
-# Source subdirectory CMakeLists.txt
-
-# Find Boost dependency
-find_package(Boost REQUIRED format)
-
 # Source files for the library
 set(src_files
     ini_config_reader.cpp
@@ -19,6 +14,7 @@ target_include_directories(yaq_lib
     PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${Boost_INCLUDE_DIRS}
+        ${jsoncpp_INCLUDE_DIRS}
 )
 
 # Main application executable
@@ -29,6 +25,7 @@ add_executable(${APPLICATION_NAME}
 target_link_libraries(${APPLICATION_NAME}
     PRIVATE
         yaq_lib
+        ${jsoncpp_LIBRARIES}
         ${GTest_LIBRARIES}
         $<$<PLATFORM_ID:Linux,Darwin>:pthread>
 )

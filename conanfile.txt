@@ -1,6 +1,7 @@
 [requires]
 gtest/1.14.0
 boost/1.88.0
+jsoncpp/1.9.6
 
 [generators]
 CMakeDeps

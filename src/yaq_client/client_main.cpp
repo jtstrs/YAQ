@@ -46,9 +46,19 @@ int main(int32_t argc, char** argv)
                 client->subscribe(arg1);
             });
         }
+        if (command == "unsubscribe" && !arg1.empty()) {
+            boost::asio::post(io_context, [&client, arg1]() {
+                client->unsubscribe(arg1);
+            });
+        }
         if (command == "topics") {
             boost::asio::post(io_context, [&client]() {
                 client->topics();
+            });
+        }
+        if (command == "post" && !arg1.empty() && !arg2.empty()) {
+            boost::asio::post(io_context, [&client, arg1, arg2]() {
+                client->post(arg1, arg2);
             });
         }
     }
